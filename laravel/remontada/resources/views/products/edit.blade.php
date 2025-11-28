@@ -44,7 +44,7 @@
 
         <div class="form-group">
             <label for="category_id">Category</label>
-            <select id="category_id" name="category_id" class="form-control" onchange="generateSKU()">
+            <select id="category_id" name="category_id" class="form-control" onchange="generateSKU()" data-original-category-id="{{ $product->category_id }}" data-original-sku="{{ $product->sku }}">
                 <option value="">-- Select Category --</option>
                 @foreach($categories as $category)
                     <option value="{{ $category->id }}" data-prefix="{{ $category->prefix }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
@@ -56,13 +56,38 @@
 
         <div class="grid grid-2">
             <div class="form-group">
-                <label for="price">Selling Price (Rp)</label>
-                <input type="number" id="price" name="price" class="form-control" step="0.01" value="{{ old('price', $product->price) }}" required>
+                <label for="price_display">Selling Price</label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #555;">Rp</span>
+                    <input type="text" id="price_display" class="form-control" inputmode="numeric" style="padding-left: 36px;" placeholder="0" value="{{ number_format((float) old('price', $product->price), 0, ',', '.') }}" oninput="onPriceInput()" required>
+                    <input type="hidden" id="price" name="price" value="{{ old('price', $product->price) }}">
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="cost">Cost Price (Rp)</label>
-                <input type="number" id="cost" name="cost" class="form-control" step="0.01" value="{{ old('cost', $product->cost) }}">
+                <label for="tax_percentage_display">Tax Optional</label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #555;">%</span>
+                    <input type="text" id="tax_percentage_display" class="form-control" inputmode="decimal" style="padding-left: 36px;" placeholder="0" value="{{ old('tax_percentage', $product->tax_percentage) }}" oninput="onTaxInput()">
+                    <input type="hidden" id="tax_percentage" name="tax_percentage" value="{{ old('tax_percentage', $product->tax_percentage) }}">
+                </div>
+                <small style="color: #666;">e.g., 10 for 10% tax</small>
+            </div>
+        </div>
+
+        <div class="grid grid-2">
+            <div class="form-group">
+                <label for="cost_display">Cost</label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #555;">Rp</span>
+                    <input type="text" id="cost_display" class="form-control" inputmode="numeric" style="padding-left: 36px;" placeholder="0" value="{{ number_format((float) old('cost', $product->cost), 0, ',', '.') }}" oninput="onCostInput()">
+                    <input type="hidden" id="cost" name="cost" value="{{ old('cost', $product->cost) }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="min_stock">Minimum Stock Alert</label>
+                <input type="number" id="min_stock" name="min_stock" class="form-control" value="{{ old('min_stock', $product->min_stock) }}">
             </div>
         </div>
 
@@ -74,8 +99,7 @@
             </div>
 
             <div class="form-group">
-                <label for="min_stock">Minimum Stock Alert</label>
-                <input type="number" id="min_stock" name="min_stock" class="form-control" value="{{ old('min_stock', $product->min_stock) }}">
+                <!-- Empty div for grid alignment -->
             </div>
         </div>
 
@@ -104,7 +128,17 @@ function generateSKU() {
     const skuInput = document.getElementById('sku');
     const selectedOption = categorySelect.options[categorySelect.selectedIndex];
     const prefix = selectedOption.getAttribute('data-prefix');
-    
+
+    const originalCategoryId = categorySelect.dataset.originalCategoryId;
+    const originalSku = categorySelect.dataset.originalSku;
+    const selectedCategoryId = categorySelect.value;
+
+    // If switched back to original category during edit, restore original SKU
+    if (originalCategoryId && originalSku && selectedCategoryId === String(originalCategoryId)) {
+        skuInput.value = originalSku;
+        return;
+    }
+
     if (prefix) {
         // Fetch next number for this category
         fetch(`/products/next-sku/${prefix}`)
@@ -135,5 +169,47 @@ function toggleInactiveReason() {
         reasonTextarea.value = '';
     }
 }
+</script>
+<script>
+function formatNumber(num) {
+    return new Intl.NumberFormat('id-ID').format(num);
+}
+
+function onPriceInput() {
+    const disp = document.getElementById('price_display');
+    const hidden = document.getElementById('price');
+    let num = parseInt((disp.value || '').toString().replace(/\D/g, '')) || 0;
+    hidden.value = num;
+    disp.value = formatNumber(num);
+}
+
+function onCostInput() {
+    const disp = document.getElementById('cost_display');
+    const hidden = document.getElementById('cost');
+    let num = parseInt((disp.value || '').toString().replace(/\D/g, '')) || 0;
+    hidden.value = num;
+    disp.value = formatNumber(num);
+}
+
+function onTaxInput() {
+    const disp = document.getElementById('tax_percentage_display');
+    const hidden = document.getElementById('tax_percentage');
+    let raw = (disp.value || '').toString();
+    raw = raw.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+    const parts = raw.split('.');
+    const normalized = parts[0] + (parts[1] ? '.' + parts[1].slice(0,2) : '');
+    let num = parseFloat(normalized) || 0;
+    if (num < 0) num = 0;
+    if (num > 100) num = 100;
+    hidden.value = num;
+    disp.value = normalized;
+}
+
+// Initialize formatted display values on load
+document.addEventListener('DOMContentLoaded', function() {
+    onPriceInput();
+    onCostInput();
+    onTaxInput();
+});
 </script>
 @endsection

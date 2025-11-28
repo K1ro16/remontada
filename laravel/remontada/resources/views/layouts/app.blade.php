@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'UMKM Management')</title>
+    <title>@yield('title', 'Nama UMKM')</title>
     <style>
         * {
             margin: 0;
@@ -15,6 +15,8 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f5f5;
             line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
         }
 
         .container {
@@ -23,28 +25,87 @@
             padding: 0 20px;
         }
 
-        /* Navigation */
-        nav {
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
             background: #2c3e50;
             color: white;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header .business-name {
+            font-size: 0.85rem;
+            color: #bdc3c7;
+        }
+
+        .sidebar-menu {
+            flex: 1;
             padding: 1rem 0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            transition: background 0.3s;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3498db;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .user-info span {
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Area */
+        .main-wrapper {
+            margin-left: 250px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - 250px);
+        }
+
+        .top-bar {
+            background: white;
+            padding: 1rem 2rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        nav .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        nav h1 {
-            font-size: 1.5rem;
-        }
-
-        nav .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
         }
 
         /* Buttons */
@@ -178,7 +239,12 @@
 
         /* Main content */
         main {
-            padding: 2rem 0;
+            padding: 2rem;
+            flex: 1;
+        }
+
+        main .container {
+            max-width: 100%;
         }
 
         /* Grid */
@@ -202,6 +268,33 @@
         @media (max-width: 768px) {
             .grid-2, .grid-3, .grid-4 {
                 grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-wrapper {
+                margin-left: 200px;
+                width: calc(100% - 200px);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .sidebar-header h1,
+            .sidebar-header .business-name,
+            .sidebar-menu a span,
+            .sidebar-footer span {
+                display: none;
+            }
+
+            .main-wrapper {
+                margin-left: 60px;
+                width: calc(100% - 60px);
             }
         }
 
@@ -230,43 +323,68 @@
 </head>
 <body>
     @if(Auth::check())
-    <nav>
-        <div class="container">
-            <div style="display: flex; align-items: center; gap: 2rem;">
-                <h1>UMKM Management</h1>
-                <div style="display: flex; gap: 1rem;">
-                    <a href="{{ route('dashboard') }}" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; {{ request()->routeIs('dashboard') ? 'background-color: rgba(255,255,255,0.2);' : '' }}">Dashboard</a>
-                    @if(Auth::user()->hasRole('pemilik'))
-                        <a href="{{ route('users.index') }}" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; {{ request()->routeIs('users.*') ? 'background-color: rgba(255,255,255,0.2);' : '' }}">Users</a>
-                    @endif
-                    <a href="{{ route('categories.index') }}" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; {{ request()->routeIs('categories.*') ? 'background-color: rgba(255,255,255,0.2);' : '' }}">Categories</a>
-                    <a href="{{ route('products.index') }}" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; {{ request()->routeIs('products.*') ? 'background-color: rgba(255,255,255,0.2);' : '' }}">Products</a>
-                </div>
-            </div>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>UMKM System</h1>
+            <div class="business-name">{{ Auth::user()->currentBusiness->name ?? 'Management System' }}</div>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <span>📊 Dashboard</span>
+            </a>
+            <a href="{{ route('sales.index') }}" class="{{ request()->routeIs('sales.*') ? 'active' : '' }}">
+                <span>💰 Sales</span>
+            </a>
+            <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'active' : '' }}">
+                <span>📦 Products</span>
+            </a>
+            <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                <span>📁 Categories</span>
+            </a>
+            <a href="{{ route('customers.index') }}" class="{{ request()->routeIs('customers.*') ? 'active' : '' }}">
+                <span>👤 Customers</span>
+            </a>
+            @if(Auth::user()->hasRole('pemilik'))
+                <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <span>👥 Users</span>
+                </a>
+            @endif
+        </div>
+
+        <div class="sidebar-footer">
             <div class="user-info">
                 <span>{{ Auth::user()->name }}</span>
-                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="btn btn-danger">Logout</button>
+                    <button type="submit" class="btn btn-danger" style="width: 100%; margin-top: 0.5rem;">Logout</button>
                 </form>
             </div>
         </div>
-    </nav>
-    @endif
+    </div>
 
+    <div class="main-wrapper">
+        <main>
+            <div class="container">
+                @if(session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
+
+                @if(session('error'))
+                    <div class="alert alert-error">{{ session('error') }}</div>
+                @endif
+
+                @yield('content')
+            </div>
+        </main>
+    </div>
+    @else
     <main>
         <div class="container">
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-error">{{ session('error') }}</div>
-            @endif
-
             @yield('content')
         </div>
     </main>
+    @endif
 
     @yield('scripts')
 </body>

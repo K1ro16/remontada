@@ -29,7 +29,7 @@
         </div>
 
         <div class="form-group">
-            <label for="prefix">Code Prefix * <small>(e.g., FD for Food, BV for Beverage)</small></label>
+            <label for="prefix">Code Prefix * <small>()</small></label>
             <input type="text" id="prefix" name="prefix" class="form-control" value="{{ old('prefix') }}" maxlength="10" required style="text-transform: uppercase;">
         </div>
 

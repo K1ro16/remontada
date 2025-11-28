@@ -41,7 +41,7 @@
                         <td>{{ $category->products_count }} products</td>
                         <td>
                             <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <button href="{{ route('categories.edit', $category->id) }}" class="btn btn-warning btn-sm" style="flex: 1; text-align: center;">Edit</button>
+                                <button type="button" onclick="window.location='{{ route('categories.edit', $category->id) }}'" class="btn btn-warning btn-sm" style="flex: 1; text-align: center; display: block;">Edit</button>
                                 @if($category->products_count == 0)
                                     <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="flex: 1;">
                                         @csrf
