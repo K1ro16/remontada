@@ -53,17 +53,26 @@
 
         <div class="grid grid-2">
             <div class="form-group">
-                <label for="price">Selling Price *</label>
-                <input type="number" name="price" id="price" class="form-control" value="{{ old('price') }}" step="0.01" min="0" required>
+                <label for="price_display">Selling Price</label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #555;">Rp</span>
+                    <input type="text" id="price_display" class="form-control" inputmode="numeric" style="padding-left: 36px;" placeholder="0" value="{{ number_format((float) old('price', 0), 0, ',', '.') }}" oninput="onPriceInput()" required>
+                    <input type="hidden" name="price" id="price" value="{{ old('price', 0) }}">
+                </div>
                 @error('price')
                     <span style="color: #e74c3c; font-size: 0.9rem;">{{ $message }}</span>
                 @enderror
             </div>
 
             <div class="form-group">
-                <label for="cost">Cost (Optional)</label>
-                <input type="number" name="cost" id="cost" class="form-control" value="{{ old('cost') }}" step="0.01" min="0">
-                @error('cost')
+                <label for="tax_percentage_display">Tax Optional</label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #555;">%</span>
+                    <input type="text" id="tax_percentage_display" class="form-control" inputmode="decimal" style="padding-left: 36px;" placeholder="0" value="{{ old('tax_percentage') ? old('tax_percentage') : '' }}" oninput="onTaxInput()">
+                    <input type="hidden" name="tax_percentage" id="tax_percentage" value="{{ old('tax_percentage') }}">
+                </div>
+                <small style="color: #666;"></small>
+                @error('tax_percentage')
                     <span style="color: #e74c3c; font-size: 0.9rem;">{{ $message }}</span>
                 @enderror
             </div>
@@ -71,20 +80,35 @@
 
         <div class="grid grid-2">
             <div class="form-group">
-                <label for="stock">Initial Stock *</label>
-                <input type="number" name="stock" id="stock" class="form-control" value="{{ old('stock', 0) }}" min="0" required>
-                @error('stock')
+                <label for="cost_display">Cost</label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #555;">Rp</span>
+                    <input type="text" id="cost_display" class="form-control" inputmode="numeric" style="padding-left: 36px;" placeholder="0" value="{{ old('cost') ? number_format((float) old('cost'), 0, ',', '.') : '' }}" oninput="onCostInput()">
+                    <input type="hidden" name="cost" id="cost" value="{{ old('cost') }}">
+                </div>
+                @error('cost')
                     <span style="color: #e74c3c; font-size: 0.9rem;">{{ $message }}</span>
                 @enderror
             </div>
 
             <div class="form-group">
-                <label for="min_stock">Minimum Stock Notif *</label>
+                <label for="min_stock">Minimum Stock Notif</label>
                 <input type="number" name="min_stock" id="min_stock" class="form-control" value="{{ old('min_stock', 5) }}" min="0" required>
                 @error('min_stock')
                     <span style="color: #e74c3c; font-size: 0.9rem;">{{ $message }}</span>
                 @enderror
             </div>
+        </div>
+
+        <div class="grid grid-2">
+            <div class="form-group">
+                <label for="stock">Initial Stock</label>
+                <input type="number" name="stock" id="stock" class="form-control" value="{{ old('stock') }}" placeholder="0" required>
+                @error('stock')
+                    <span style="color: #e74c3c; font-size: 0.9rem;">{{ $message }}</span>
+                @enderror
+            </div>
+
         </div>
 
         <div class="form-group">
@@ -143,5 +167,48 @@ function toggleInactiveReason() {
         reasonTextarea.value = '';
     }
 }
+</script>
+<script>
+function formatNumber(num) {
+    return new Intl.NumberFormat('id-ID').format(num);
+}
+
+function onPriceInput() {
+    const disp = document.getElementById('price_display');
+    const hidden = document.getElementById('price');
+    let num = parseInt((disp.value || '').toString().replace(/\D/g, '')) || 0;
+    hidden.value = num;
+    disp.value = formatNumber(num);
+}
+
+function onCostInput() {
+    const disp = document.getElementById('cost_display');
+    const hidden = document.getElementById('cost');
+    let num = parseInt((disp.value || '').toString().replace(/\D/g, '')) || 0;
+    hidden.value = num;
+    disp.value = formatNumber(num);
+}
+
+function onTaxInput() {
+    const disp = document.getElementById('tax_percentage_display');
+    const hidden = document.getElementById('tax_percentage');
+    let raw = (disp.value || '').toString();
+    raw = raw.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+    const parts = raw.split('.');
+    const normalized = parts[0] + (parts[1] ? '.' + parts[1].slice(0,2) : '');
+    let num = parseFloat(normalized) || 0;
+    if (num < 0) num = 0;
+    if (num > 100) num = 100;
+    hidden.value = num;
+    disp.value = normalized;
+}
+
+// Initialize formatted display values on load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize formatted display values only if old values exist
+    if (document.getElementById('price').value) { onPriceInput(); }
+    if (document.getElementById('cost').value) { onCostInput(); }
+    if (document.getElementById('tax_percentage').value) { onTaxInput(); }
+});
 </script>
 @endsection

@@ -147,9 +147,9 @@
             <div class="form-group">
                 <label>Type</label>
                 <select name="type" class="form-control" required>
-                    <option value="in">Stock In (Add)</option>
-                    <option value="out">Stock Out (Remove)</option>
-                    <option value="adjustment">Adjustment (Set Exact)</option>
+                    <option value="in">Add Stock</option>
+                    <option value="out">Remove Stock</option>
+                    <option value="adjustment">Adjust Stock</option>
                 </select>
             </div>
             <div class="form-group">

@@ -61,16 +61,50 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'prefix' => 'required|string|max:10',
             'description' => 'nullable|string',
+            'update_skus' => 'nullable',
         ]);
+        $oldPrefix = $category->prefix;
+        $newPrefix = strtoupper($request->prefix);
 
         $category->update([
             'name' => $request->name,
-            'prefix' => strtoupper($request->prefix),
+            'prefix' => $newPrefix,
             'description' => $request->description,
         ]);
 
+        $updatedCount = 0;
+        // If user opted in and prefix actually changed
+        if ($request->has('update_skus') && $oldPrefix !== $newPrefix) {
+            $products = $category->products()->get();
+            foreach ($products as $product) {
+                $sku = $product->sku;
+                // Match old prefix + numeric suffix only
+                if (str_starts_with($sku, $oldPrefix)) {
+                    $numeric = substr($sku, strlen($oldPrefix));
+                    if ($numeric !== '' && preg_match('/^[0-9]+$/', $numeric)) {
+                        $newSku = $newPrefix . $numeric;
+                        // Skip if collision with existing SKU in any product
+                        $exists = \App\Models\Product::where('sku', $newSku)->where('id', '!=', $product->id)->exists();
+                        if ($exists) {
+                            continue; // leave original sku to avoid conflict
+                        }
+                        $product->sku = $newSku;
+                        $product->save();
+                        $updatedCount++;
+                    }
+                }
+            }
+        }
+
+        $message = 'Category updated successfully.';
+        if ($updatedCount > 0) {
+            $message .= " Updated $updatedCount product code" . ($updatedCount === 1 ? '' : 's') . '.';
+        } elseif ($request->has('update_skus') && $oldPrefix !== $newPrefix) {
+            $message .= ' No product codes required updating (possible conflicts or no matching codes).';
+        }
+
         return redirect()->route('categories.index')
-            ->with('success', 'Category updated successfully.');
+            ->with('success', $message);
     }
 
     public function destroy(Category $category)

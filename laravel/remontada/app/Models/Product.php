@@ -13,6 +13,7 @@ class Product extends Model
         'sku',
         'description',
         'price',
+        'tax_percentage',
         'cost',
         'stock',
         'min_stock',
@@ -22,6 +23,7 @@ class Product extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'tax_percentage' => 'decimal:2',
         'cost' => 'decimal:2',
         'is_active' => 'boolean',
     ];

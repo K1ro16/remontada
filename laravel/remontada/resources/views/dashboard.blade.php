@@ -27,10 +27,10 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card" style="margin-top: 1rem;">
     <h2>Quick Actions</h2>
     <div class="grid @if(Auth::user()->hasRole('pemilik')) grid-4 @else grid-3 @endif" style="margin-top: 1rem;">
-        <a href="#" class="btn btn-primary" style="text-align: center; text-decoration: none;">New Sale</a>
+        <a href="{{ route('sales.create') }}" class="btn btn-primary" style="text-align: center; text-decoration: none;">New Sale</a>
         <a href="{{ route('products.create') }}" class="btn btn-success" style="text-align: center; text-decoration: none;">Add Product</a>
         <a href="{{ route('products.index') }}" class="btn btn-warning" style="text-align: center; text-decoration: none;">Manage Inventory</a>
         @if(Auth::user()->hasRole('pemilik'))
