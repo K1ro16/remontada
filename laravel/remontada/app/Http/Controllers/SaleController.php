@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Inventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\ActivityLogger;
 
 class SaleController extends Controller
 {
@@ -126,6 +127,15 @@ class SaleController extends Controller
 
             DB::commit();
 
+            ActivityLogger::log('created', 'Sale', $sale->id, null, [
+                'invoice_number' => $sale->invoice_number,
+                'subtotal' => $sale->subtotal,
+                'tax' => $sale->tax,
+                'discount' => $sale->discount,
+                'total' => $sale->total,
+                'sale_date' => $sale->sale_date,
+            ], 'Created sale #' . $sale->invoice_number);
+
             return redirect()->route('sales.show', $sale)->with('success', 'Sale recorded successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -166,8 +176,11 @@ class SaleController extends Controller
                 ]);
             }
 
+            $old = $sale->toArray();
             $sale->delete();
             DB::commit();
+
+            ActivityLogger::log('deleted', 'Sale', $sale->id, $old, null, 'Deleted sale #' . ($old['invoice_number'] ?? $sale->id));
 
             return redirect()->route('sales.index')->with('success', 'Sale deleted and stock restored.');
         } catch (\Exception $e) {

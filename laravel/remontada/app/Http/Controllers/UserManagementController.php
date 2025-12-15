@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\Business;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Services\ActivityLogger;
 
 class UserManagementController extends Controller
 {
@@ -14,7 +15,7 @@ class UserManagementController extends Controller
     {
         // Check if user is owner
         if (!auth()->user()->hasRole('pemilik')) {
-            abort(403, 'Unauthorized. Only business owners can manage users.');
+            abort(403, 'only business owners can manage users.');
         }
 
         $business = auth()->user()->currentBusiness;
@@ -27,7 +28,7 @@ class UserManagementController extends Controller
     {
         // Check if user is owner
         if (!auth()->user()->hasRole('pemilik')) {
-            abort(403, 'Unauthorized. Only business owners can manage users.');
+            abort(403, 'only business owners can manage users.');
         }
 
         $roles = Role::all();
@@ -38,7 +39,7 @@ class UserManagementController extends Controller
     {
         // Check if user is owner
         if (!auth()->user()->hasRole('pemilik')) {
-            abort(403, 'Unauthorized. Only business owners can manage users.');
+            abort(403, 'only business owners can manage users.');
         }
 
         $request->validate([
@@ -60,6 +61,12 @@ class UserManagementController extends Controller
         // Attach user to business with role
         $user->businesses()->attach($business->id, ['role_id' => $request->role_id]);
 
+        ActivityLogger::log('created', 'User', $user->id, null, [
+            'name' => $user->name,
+            'email' => $user->email,
+            'role_id' => $request->role_id,
+        ], 'Invited user ' . $user->name . ' <' . $user->email . '> as role #' . $request->role_id);
+
         return redirect()->route('users.index')->with('success', 'User created successfully!');
     }
 
@@ -67,7 +74,7 @@ class UserManagementController extends Controller
     {
         // Check if user is owner
         if (!auth()->user()->hasRole('pemilik')) {
-            abort(403, 'Unauthorized. Only business owners can manage users.');
+            abort(403, 'only business owners can manage users.');
         }
 
         $roles = Role::all();
@@ -82,7 +89,7 @@ class UserManagementController extends Controller
     {
         // Check if user is owner
         if (!auth()->user()->hasRole('pemilik')) {
-            abort(403, 'Unauthorized. Only business owners can manage users.');
+            abort(403, 'only business owners can manage users.');
         }
 
         $request->validate([
@@ -91,6 +98,7 @@ class UserManagementController extends Controller
             'role_id' => 'required|exists:roles,id',
         ]);
 
+        $old = $user->toArray();
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
@@ -100,6 +108,12 @@ class UserManagementController extends Controller
         $business = auth()->user()->currentBusiness;
         $user->businesses()->updateExistingPivot($business->id, ['role_id' => $request->role_id]);
 
+        ActivityLogger::log('updated', 'User', $user->id, $old, [
+            'name' => $user->name,
+            'email' => $user->email,
+            'role_id' => $request->role_id,
+        ], 'Edited user ' . $user->name . ' <' . $user->email . '> role change');
+
         return redirect()->route('users.index')->with('success', 'User updated successfully!');
     }
 
@@ -107,7 +121,7 @@ class UserManagementController extends Controller
     {
         // Check if user is owner
         if (!auth()->user()->hasRole('pemilik')) {
-            abort(403, 'Unauthorized. Only business owners can manage users.');
+            abort(403, 'only business owners can manage users.');
         }
 
         if ($user->id === auth()->id()) {
@@ -115,6 +129,7 @@ class UserManagementController extends Controller
         }
 
         $business = auth()->user()->currentBusiness;
+        $old = $user->toArray();
         $user->businesses()->detach($business->id);
         
         // If user has no other businesses, delete the user
@@ -122,6 +137,8 @@ class UserManagementController extends Controller
             $user->delete();
         }
 
-        return redirect()->route('users.index')->with('success', 'User removed successfully!');
+        ActivityLogger::log('deleted', 'User', $user->id, $old, null, 'Removed user ' . ($old['name'] ?? 'Unknown') . ' <' . ($old['email'] ?? '') . '>');
+
+        return redirect()->route('users.index')->with('success', 'User removed!');
     }
 }

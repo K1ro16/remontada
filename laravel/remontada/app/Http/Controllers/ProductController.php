@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Inventory;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -62,6 +63,15 @@ class ProductController extends Controller
             'inactive_reason' => $request->is_inactive ? $request->inactive_reason : null,
         ]);
 
+        ActivityLogger::log(
+            'created',
+            'Product',
+            $product->id,
+            null,
+            $product->toArray(),
+            'Created product ' . $product->name . ' #' . $product->sku
+        );
+
         // Log initial stock
         Inventory::create([
             'business_id' => $business->id,
@@ -100,6 +110,7 @@ class ProductController extends Controller
             'inactive_reason' => 'required_if:is_inactive,1|nullable|string',
         ]);
 
+        $old = $product->toArray();
         $product->update([
             'name' => $request->name,
             'sku' => $request->sku,
@@ -113,12 +124,30 @@ class ProductController extends Controller
             'inactive_reason' => $request->is_inactive ? $request->inactive_reason : null,
         ]);
 
+        ActivityLogger::log(
+            'updated',
+            'Product',
+            $product->id,
+            $old,
+            $product->toArray(),
+            'Edited product ' . $product->name . ' #' . $product->sku
+        );
+
         return redirect()->route('products.index')->with('success', 'Product updated successfully!');
     }
 
     public function destroy(Product $product)
     {
+        $old = $product->toArray();
         $product->delete();
+        ActivityLogger::log(
+            'deleted',
+            'Product',
+            $product->id,
+            $old,
+            null,
+            'Deleted product ' . ($old['name'] ?? 'Unknown') . ' #' . ($old['sku'] ?? '')
+        );
         return redirect()->route('products.index')->with('success', 'Product deleted successfully!');
     }
 
@@ -143,7 +172,7 @@ class ProductController extends Controller
 
         $product->save();
 
-        Inventory::create([
+        $inventory = Inventory::create([
             'business_id' => $business->id,
             'product_id' => $product->id,
             'user_id' => auth()->id(),
@@ -153,6 +182,25 @@ class ProductController extends Controller
             'stock_after' => $product->stock,
             'notes' => $request->notes,
         ]);
+
+        // Activity log for inventory changes
+        $verb = $request->type === 'in' ? 'Added' : ($request->type === 'out' ? 'Removed' : 'Adjusted');
+        $delta = $request->type === 'in' ? '+' . $request->quantity : ($request->type === 'out' ? '-' . $request->quantity : (string)$request->quantity);
+        $message = $verb . ' stock ' . $product->name . ' #' . $product->sku . ' ' . $delta . ' (stock: ' . $stockBefore . ' → ' . $product->stock . ')';
+        ActivityLogger::log(
+            'inventory-' . $request->type,
+            'Inventory',
+            $inventory->id,
+            ['stock_before' => $stockBefore],
+            [
+                'stock_after' => $product->stock,
+                'quantity' => (int)$request->quantity,
+                'type' => $request->type,
+                'product_id' => $product->id,
+                'product_sku' => $product->sku,
+            ],
+            $message
+        );
 
         return redirect()->route('products.index')->with('success', 'Stock adjusted successfully!');
     }

@@ -1,5 +1,5 @@
-1. Composer Install
-2. npm Install
+Composer Install
+npm Install
 cp .env.example .env
 Setting env
 php artisan key:generate
