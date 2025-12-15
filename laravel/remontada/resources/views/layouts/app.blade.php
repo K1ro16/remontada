@@ -345,6 +345,9 @@
             <a href="{{ route('customers.index') }}" class="{{ request()->routeIs('customers.*') ? 'active' : '' }}">
                 <span>👤 Customers</span>
             </a>
+            <a href="{{ route('activity.index') }}" class="{{ request()->routeIs('activity.*') ? 'active' : '' }}">
+                <span>📝 Activity Log</span>
+            </a>
             @if(Auth::user()->hasRole('pemilik'))
                 <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
                     <span>👥 Users</span>

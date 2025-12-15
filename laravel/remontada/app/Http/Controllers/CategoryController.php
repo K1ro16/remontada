@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\ActivityLogger;
 
 class CategoryController extends Controller
 {
@@ -31,12 +32,14 @@ class CategoryController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        Category::create([
+        $category = Category::create([
             'business_id' => Auth::user()->current_business_id,
             'name' => $request->name,
             'prefix' => strtoupper($request->prefix),
             'description' => $request->description,
         ]);
+
+        ActivityLogger::log('created', 'Category', $category->id, null, $category->toArray(), 'Created category ' . $category->name . ' [' . $category->prefix . ']');
 
         return redirect()->route('categories.index')
             ->with('success', 'Category created successfully.');
@@ -66,11 +69,13 @@ class CategoryController extends Controller
         $oldPrefix = $category->prefix;
         $newPrefix = strtoupper($request->prefix);
 
+        $old = $category->toArray();
         $category->update([
             'name' => $request->name,
             'prefix' => $newPrefix,
             'description' => $request->description,
         ]);
+    ActivityLogger::log('updated', 'Category', $category->id, $old, $category->toArray(), 'Edited category ' . $category->name . ' [' . $old['prefix'] . '→' . $category->prefix . ']');
 
         $updatedCount = 0;
         // If user opted in and prefix actually changed
@@ -120,7 +125,10 @@ class CategoryController extends Controller
                 ->with('error', 'Cannot delete category with existing products.');
         }
 
+        $old = $category->toArray();
         $category->delete();
+
+        ActivityLogger::log('deleted', 'Category', $category->id, $old, null, 'Deleted category ' . ($old['name'] ?? 'Unknown') . ' [' . ($old['prefix'] ?? '') . ']');
 
         return redirect()->route('categories.index')
             ->with('success', 'Category deleted successfully.');

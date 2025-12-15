@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ActivityLogController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -32,4 +33,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Customer Management
     Route::resource('customers', CustomerController::class);
+
+    // Activity Logs
+    Route::get('activity', [ActivityLogController::class, 'index'])->name('activity.index');
 });

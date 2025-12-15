@@ -70,6 +70,11 @@
             </div>
 
             <div class="form-group">
+                <label for="business_name">Business Name <span style="color:#7f8c8d; font-weight: normal;"></span></label>
+                <input type="text" name="business_name" id="business_name" class="form-control" value="{{ old('business_name') }}">
+            </div>
+
+            <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" name="password" id="password" class="form-control" required>
             </div>
