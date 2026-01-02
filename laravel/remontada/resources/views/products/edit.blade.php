@@ -20,7 +20,7 @@
         </div>
     @endif
 
-    <form action="{{ route('products.update', $product->id) }}" method="POST">
+    <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         
@@ -40,6 +40,25 @@
         <div class="form-group">
             <label for="description">Description</label>
             <textarea id="description" name="description" class="form-control" rows="3">{{ old('description', $product->description) }}</textarea>
+        </div>
+
+        <div class="grid grid-2">
+            <div class="form-group">
+                <label for="image">Product Image</label>
+                <input type="file" id="image" name="image" class="form-control" accept="image/*">
+                <small style="color:#666;">Upload to replace current image (max 2MB)</small>
+                @error('image')
+                    <span style="color: #e74c3c; font-size: 0.9rem;">{{ $message }}</span>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label>Current Image</label>
+                @if($product->image_path)
+                    <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" style="width: 100%; max-height: 180px; object-fit: cover; border:1px solid #eee; border-radius: 4px;" />
+                @else
+                    <div style="padding: .75rem; color:#7f8c8d; border:1px dashed #ccc; border-radius:4px;">No image uploaded</div>
+                @endif
+            </div>
         </div>
 
         <div class="form-group">

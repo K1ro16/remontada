@@ -5,39 +5,18 @@
 @section('content')
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h2 style="margin: 0;">Sale Invoice</h2>
+        <h2 style="margin: 0;">Sale Details</h2>
         <div style="display: flex; gap: 0.5rem;">
             <button onclick="window.print()" class="btn btn-primary">🖨️ Print</button>
             <a href="{{ route('sales.index') }}" class="btn btn-secondary">Back</a>
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2rem;">
         <div>
-            <h3 style="margin-bottom: 0.5rem;">Invoice Information</h3>
-            <p style="margin: 0.25rem 0;"><strong>Invoice #:</strong> {{ $sale->invoice_number }}</p>
-            <p style="margin: 0.25rem 0;"><strong>Date:</strong> {{ $sale->sale_date->format('d M Y H:i') }}</p>
-            <p style="margin: 0.25rem 0;"><strong>Status:</strong> 
-                <span style="padding: 0.25rem 0.5rem; background: {{ $sale->status === 'completed' ? '#27ae60' : ($sale->status === 'pending' ? '#f39c12' : '#e74c3c') }}; color: white; border-radius: 4px; font-size: 0.75rem;">
-                    {{ ucfirst($sale->status) }}
-                </span>
-            </p>
-            <p style="margin: 0.25rem 0;"><strong>Cashier:</strong> {{ $sale->user->name }}</p>
-        </div>
-
-        <div>
-            <h3 style="margin-bottom: 0.5rem;">Customer</h3>
-            @if($sale->customer)
-                <p style="margin: 0.25rem 0;"><strong>Name:</strong> {{ $sale->customer->name }}</p>
-                @if($sale->customer->phone)
-                    <p style="margin: 0.25rem 0;"><strong>Phone:</strong> {{ $sale->customer->phone }}</p>
-                @endif
-                @if($sale->customer->email)
-                    <p style="margin: 0.25rem 0;"><strong>Email:</strong> {{ $sale->customer->email }}</p>
-                @endif
-            @else
-                <p style="margin: 0.25rem 0; color: #666;">Customer</p>
-            @endif
+            <h3 style="margin-bottom: 0.5rem;">Sale Information</h3>
+            <p style="margin: 0.25rem 0;"><strong>Date:</strong> {{ $sale->sale_date->format('d M Y') }}</p>
+            <p style="margin: 0.25rem 0;"><strong>Account:</strong> {{ $sale->user->name }}</p>
         </div>
     </div>
 

@@ -4,9 +4,15 @@
 
 @section('content')
 <div class="card">
-    <h2>Add New Product</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0;">Add New Product</h2>
+        <a href="{{ route('products.index') }}" class="btn btn-secondary back-btn" aria-label="Back to Products">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M15 18L9 12L15 6" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Back</span>
+        </a>
+    </div>
 
-    <form method="POST" action="{{ route('products.store') }}">
+    <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
         @csrf
         
         <div class="grid grid-2">
@@ -51,6 +57,15 @@
             @enderror
         </div>
 
+        <div class="form-group">
+            <label for="image">Product Image</label>
+            <input type="file" name="image" id="image" class="form-control" accept="image/*">
+            <small style="color:#666;">Max 2MB; JPG/PNG/WebP</small>
+            @error('image')
+                <span style="color: #e74c3c; font-size: 0.9rem;">{{ $message }}</span>
+            @enderror
+        </div>
+
         <div class="grid grid-2">
             <div class="form-group">
                 <label for="price_display">Selling Price</label>
@@ -80,7 +95,7 @@
 
         <div class="grid grid-2">
             <div class="form-group">
-                <label for="cost_display">Cost</label>
+                <label for="cost_display">Cost/item</label>
                 <div style="position: relative;">
                     <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #555;">Rp</span>
                     <input type="text" id="cost_display" class="form-control" inputmode="numeric" style="padding-left: 36px;" placeholder="0" value="{{ old('cost') ? number_format((float) old('cost'), 0, ',', '.') : '' }}" oninput="onCostInput()">
@@ -211,4 +226,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('tax_percentage').value) { onTaxInput(); }
 });
 </script>
+@endsection
+
+@section('styles')
+<style>
+    .back-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .375rem .75rem; border: 1px solid #ced4da; border-radius: .25rem; background-color: #fff; }
+    .back-btn:hover { border-color: #b5b5b5; background-color: #f8f9fa; }
+    .back-btn svg { display: block; }
+</style>
 @endsection

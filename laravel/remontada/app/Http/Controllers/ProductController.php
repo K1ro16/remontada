@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Inventory;
 use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -37,6 +38,7 @@ class ProductController extends Controller
             'sku' => 'required|string|unique:products',
             'category_id' => 'nullable|exists:categories,id',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
             'price' => 'required|numeric|min:0',
             'tax_percentage' => 'nullable|numeric|min:0|max:100',
             'cost' => 'nullable|numeric|min:0',
@@ -48,12 +50,18 @@ class ProductController extends Controller
 
         $business = auth()->user()->currentBusiness;
 
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('products', 'public');
+        }
+
         $product = Product::create([
             'business_id' => $business->id,
             'name' => $request->name,
             'sku' => strtoupper($request->sku),
             'category_id' => $request->category_id,
             'description' => $request->description,
+            'image_path' => $imagePath,
             'price' => $request->price,
             'tax_percentage' => $request->tax_percentage ?? 0,
             'cost' => $request->cost,
@@ -102,6 +110,7 @@ class ProductController extends Controller
             'sku' => 'required|string|unique:products,sku,' . $product->id,
             'category_id' => 'exists:categories,id',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
             'price' => 'required|numeric|min:0',
             'tax_percentage' => 'nullable|numeric|min:0|max:100',
             'cost' => 'nullable|numeric|min:0',
@@ -111,7 +120,7 @@ class ProductController extends Controller
         ]);
 
         $old = $product->toArray();
-        $product->update([
+        $data = [
             'name' => $request->name,
             'sku' => $request->sku,
             'category_id' => $request->category_id,
@@ -122,7 +131,17 @@ class ProductController extends Controller
             'min_stock' => $request->min_stock,
             'is_active' => !$request->has('is_inactive'),
             'inactive_reason' => $request->is_inactive ? $request->inactive_reason : null,
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($product->image_path) {
+                Storage::disk('public')->delete($product->image_path);
+            }
+            $data['image_path'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product->update($data);
 
         ActivityLogger::log(
             'updated',

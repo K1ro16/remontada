@@ -12,6 +12,10 @@ class Business extends Model
         'phone',
         'email',
         'address',
+        'kpi_growth_warn',
+        'kpi_growth_crit',
+        'kpi_margin_warn',
+        'kpi_margin_crit',
     ];
 
     public function users()

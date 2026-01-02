@@ -8,7 +8,6 @@ class Sale extends Model
 {
     protected $fillable = [
         'business_id',
-        'customer_id',
         'user_id',
         'invoice_number',
         'subtotal',
@@ -33,10 +32,7 @@ class Sale extends Model
         return $this->belongsTo(Business::class);
     }
 
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
+    // Customer removed from the flow
 
     public function user()
     {

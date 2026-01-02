@@ -26,7 +26,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Prefix</th>
+                    <th>Product Code</th>
                     <th>Description</th>
                     <th>Products</th>
                     <th style="width: 200px;">Actions</th>

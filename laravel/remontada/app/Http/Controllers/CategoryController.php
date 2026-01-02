@@ -75,7 +75,20 @@ class CategoryController extends Controller
             'prefix' => $newPrefix,
             'description' => $request->description,
         ]);
-    ActivityLogger::log('updated', 'Category', $category->id, $old, $category->toArray(), 'Edited category ' . $category->name . ' [' . $old['prefix'] . '→' . $category->prefix . ']');
+            // Build precise activity message based on actual changes
+            $changes = [];
+            if ($old['name'] !== $category->name) {
+                $changes[] = "Renamed '{$old['name']}' → '{$category->name}'";
+            }
+            if ($old['prefix'] !== $category->prefix) {
+                $changes[] = "Changed code prefix [{$old['prefix']}→{$category->prefix}]";
+            }
+            if (($old['description'] ?? '') !== ($category->description ?? '')) {
+                $changes[] = 'Updated description';
+            }
+            $activityMessage = $changes ? ('Edited category: ' . implode('; ', $changes)) : ('Edited category ' . $category->name);
+
+            ActivityLogger::log('updated', 'Category', $category->id, $old, $category->toArray(), $activityMessage);
 
         $updatedCount = 0;
         // If user opted in and prefix actually changed
