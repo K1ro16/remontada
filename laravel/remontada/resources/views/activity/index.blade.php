@@ -69,7 +69,27 @@
     </table>
 
     <div style="margin-top:1rem;">
-        {{ $logs->links() }}
+        {{ $logs->links('pagination::default') }}
     </div>
 </div>
+@endsection
+@section('styles')
+<style>
+    .pagination { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; list-style: none; padding-left: 0; }
+    .pagination li { list-style: none; }
+    .pagination li::marker { content: ''; }
+    .pagination a, .pagination span {
+        display: inline-block;
+        padding: .375rem .75rem;
+        border: 1px solid #ddd;
+        border-radius: .25rem;
+        background: #fff;
+        color: #2c3e50;
+        text-decoration: none;
+    }
+    .pagination a:hover { background: #f8f9fa; }
+    .pagination .active span { border-color: #3498db; color: #3498db; }
+    .pagination .disabled span { color: #999; background: #f5f5f5; }
+
+</style>
 @endsection

@@ -28,6 +28,11 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
                     @foreach($categoryProducts as $product)
                         <div class="card" style="margin: 0; {{ !$product->is_active ? 'opacity: 0.6; background-color: #f5f5f5;' : '' }}">
+                            @if($product->image_path)
+                                <div style="margin: -1.5rem -1.5rem 0.75rem -1.5rem;">
+                                    <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" style="width:100%; height:140px; object-fit: cover; border-top-left-radius:8px; border-top-right-radius:8px;">
+                                </div>
+                            @endif
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
                                 <div>
                                     <h3 style="margin: 0; font-size: 1.1rem;">{{ $product->name }}</h3>
@@ -85,6 +90,11 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
                     @foreach($uncategorized as $product)
                         <div class="card" style="margin: 0; {{ !$product->is_active ? 'opacity: 0.6; background-color: #f5f5f5;' : '' }}">
+                            @if($product->image_path)
+                                <div style="margin: -1.5rem -1.5rem 0.75rem -1.5rem;">
+                                    <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}" style="width:100%; height:140px; object-fit: cover; border-top-left-radius:8px; border-top-right-radius:8px;">
+                                </div>
+                            @endif
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
                                 <div>
                                     <h3 style="margin: 0; font-size: 1.1rem;">{{ $product->name }}</h3>

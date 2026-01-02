@@ -32,7 +32,9 @@
                     </span>
                 </td>
                 <td>
-                    <a href="{{ route('users.edit', $user) }}" class="btn btn-warning" style="margin-right: 0.5rem;">Edit</a>
+                    <form method="GET" action="{{ route('users.edit', $user) }}" style="display: inline; margin-right: 0.5rem;">
+                        <button type="submit" class="btn btn-warning">Edit</button>
+                    </form>
                     @if($user->id !== auth()->id())
                     <form method="POST" action="{{ route('users.destroy', $user) }}" style="display: inline;">
                         @csrf

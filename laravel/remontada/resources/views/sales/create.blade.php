@@ -6,7 +6,10 @@
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h2 style="margin: 0;">Record New Sale</h2>
-        <a href="{{ route('sales.index') }}" class="btn btn-secondary">Back</a>
+        <a href="{{ route('sales.index') }}" class="btn btn-secondary back-btn" aria-label="Back to Sales">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M15 18L9 12L15 6" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Back</span>
+        </a>
     </div>
 
     @if ($errors->any())
@@ -23,25 +26,10 @@
     <form action="{{ route('sales.store') }}" method="POST" id="saleForm">
         @csrf
         
-        <div class="grid grid-2">
+        <div class="grid grid-1">
             <div class="form-group">
                 <label for="sale_date">Sale Date *</label>
                 <input type="date" id="sale_date" name="sale_date" class="form-control" value="{{ old('sale_date', now()->format('Y-m-d')) }}" required style="cursor: pointer;" onclick="this.showPicker && this.showPicker()" onfocus="this.showPicker && this.showPicker()">
-            </div>
-
-            <div class="form-group">
-                <label for="customer_id">Customer (Optional)</label>
-                <select id="customer_id" name="customer_id" class="form-control">
-                    <option value="">Customer</option>
-                    @foreach($customers as $customer)
-                        <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
-                            {{ $customer->name }} {{ $customer->phone ? '- ' . $customer->phone : '' }}
-                        </option>
-                    @endforeach
-                </select>
-                <small style="color: #666;">
-                    <a href="{{ route('customers.create') }}" target="_blank" style="color: #3498db;">Add new customer</a>
-                </small>
             </div>
         </div>
 
@@ -235,4 +223,12 @@ document.addEventListener('DOMContentLoaded', function() {
     addItem();
 });
 </script>
+@endsection
+
+@section('styles')
+<style>
+    .back-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .375rem .75rem; border: 1px solid #ced4da; border-radius: .25rem; background-color: #fff; }
+    .back-btn:hover { border-color: #b5b5b5; background-color: #f8f9fa; }
+    .back-btn svg { display: block; }
+</style>
 @endsection

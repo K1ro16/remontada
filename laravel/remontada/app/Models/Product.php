@@ -12,6 +12,7 @@ class Product extends Model
         'name',
         'sku',
         'description',
+        'image_path',
         'price',
         'tax_percentage',
         'cost',

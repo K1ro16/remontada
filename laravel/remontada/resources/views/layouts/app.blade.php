@@ -120,6 +120,11 @@
             transition: all 0.3s;
         }
 
+        /* Reusable Back button (matches Add Product page) */
+        .back-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .375rem .75rem; border: 1px solid #ced4da; border-radius: .25rem; background-color: #fff; color: inherit; }
+        .back-btn:hover { border-color: #b5b5b5; background-color: #f8f9fa; }
+        .back-btn svg { display: block; }
+
         .btn-primary {
             background: #3498db;
             color: white;
@@ -264,9 +269,18 @@
         .grid-4 {
             grid-template-columns: repeat(4, 1fr);
         }
+        .grid-5 {
+            grid-template-columns: repeat(5, 1fr);
+        }
+        .grid-6 {
+            grid-template-columns: repeat(6, 1fr);
+        }
+        .grid-7 {
+            grid-template-columns: repeat(7, 1fr);
+        }
 
         @media (max-width: 768px) {
-            .grid-2, .grid-3, .grid-4 {
+            .grid-2, .grid-3, .grid-4, .grid-5, .grid-6, .grid-7 {
                 grid-template-columns: 1fr;
             }
 
@@ -318,6 +332,14 @@
             font-weight: bold;
             color: #2c3e50;
         }
+
+        /* Print: only main content (hide sidebar, buttons, alerts) */
+        @media print {
+            .sidebar { display: none !important; }
+            .main-wrapper { margin-left: 0 !important; width: 100% !important; }
+            .btn { display: none !important; }
+            .alert { display: none !important; }
+        }
     </style>
     @yield('styles')
 </head>
@@ -326,7 +348,7 @@
     <div class="sidebar">
         <div class="sidebar-header">
             <h1>UMKM System</h1>
-            <div class="business-name">{{ Auth::user()->currentBusiness->name ?? 'Management System' }}</div>
+            <h1 class="business-name">{{ Auth::user()->currentBusiness->name ?? 'Management System' }}</h1>
         </div>
         
         <div class="sidebar-menu">
@@ -342,12 +364,18 @@
             <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}">
                 <span>📁 Categories</span>
             </a>
-            <a href="{{ route('customers.index') }}" class="{{ request()->routeIs('customers.*') ? 'active' : '' }}">
-                <span>👤 Customers</span>
-            </a>
             <a href="{{ route('activity.index') }}" class="{{ request()->routeIs('activity.*') ? 'active' : '' }}">
                 <span>📝 Activity Log</span>
             </a>
+                <a href="{{ route('analytics.index') }}" class="{{ request()->routeIs('analytics.*') && !request()->routeIs('analytics.kpi') ? 'active' : '' }}">
+                    <span>📈 Analytics</span>
+                </a>
+                <a href="{{ route('analytics.kpi') }}" class="{{ request()->routeIs('analytics.kpi') ? 'active' : '' }}">
+                    <span>🎯 KPI</span>
+                </a>
+                <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.*') ? 'active' : '' }}">
+                    <span>🔔 Notifications</span>
+                </a>
             @if(Auth::user()->hasRole('pemilik'))
                 <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
                     <span>👥 Users</span>
